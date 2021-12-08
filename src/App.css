@@ -1,5 +1,5 @@
-.App {
-  text-align: center;
+* {
+  box-sizing: border-box;
 }
 
 textarea {
@@ -53,4 +53,18 @@ button,
 input {
   padding: 12px;
   vertical-align: middle;
+}
+
+pre {
+  overflow: auto;
+}
+
+.code {
+  position: absolute;
+  border: 1px solid #333;
+  padding: 12px;
+  margin: 12px;
+  white-space: pre-wrap; 
+  word-wrap: break-word;
+  width: calc(100% - 24px);
 }
