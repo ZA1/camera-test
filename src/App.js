@@ -4,11 +4,11 @@ import { useRef, useState } from 'react';
 function App() {
   const videoRef = useRef();
   const [error, setError] = useState();
-  const [caps, setCaps] = useState();
-  const [constraints, setConstraints] = useState(JSON.stringify({
+  const [caps, setCaps] = useState({});
+  const [constraints, setConstraints] = useState({
     audio: false,
     video: { width: 1280, height: 720, facingMode: "user" }
-  }, null, 3));
+  });
 
   const apply = async () => {
     let stream = null;
@@ -16,9 +16,10 @@ function App() {
     try {
       videoRef.current.pause();
       videoRef.current.srcObject = null;
-      stream = await navigator.mediaDevices.getUserMedia(JSON.parse(constraints));
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
       videoRef.current.srcObject = stream;
-      setCaps(JSON.stringify(stream.getTracks()[0].getCapabilities(), null, 3));
+      setCaps(stream.getTracks()[0].getCapabilities());
+      console.log(stream.getTracks()[0].getConstraints());
       setError("");
       /* use the stream */
     } catch (err) {
@@ -30,11 +31,62 @@ function App() {
     videoRef.current.play();
   };
 
+  const Slider = (name, cap) => {
+    const change = (event) => {
+      const video = {...constraints.video};
+      video[name] = parseFloat(event.target.value);
+      setConstraints({...constraints, video});
+    }
+
+    const remove = () => {
+      const video = {...constraints.video};
+      delete video[name];
+      setConstraints({...constraints, video});
+    }
+
+    return <div>
+      <input type="range" max={cap.max} min={cap.min} step={cap.step} value={constraints.video[cap]} onChange={change} />
+      <button onClick={remove}>X</button>
+      </div>;
+  }
+
+  const Select = (name, cap) => {
+    const change = (event) => {
+      const video = {...constraints.video};
+      video[name] = event.target.value;
+      setConstraints({...constraints, video});
+    }
+
+    const remove = () => {
+      const video = {...constraints.video};
+      delete video[name];
+      setConstraints({...constraints, video});
+    }
+
+    return <div>
+      <select value={constraints.video[cap]} onChange={change}>
+        {cap.map(v => <option>{v}</option>)}
+      </select>
+      <button onClick={remove}>X</button>
+    </div>;
+  }
+
   return (
     <div className="App">
       <div>
-        <textarea onChange={(e) => setConstraints(e.target.value)} value={constraints}></textarea>
-        <pre className="caps">{caps}</pre>
+        <pre className="caps">{JSON.stringify(constraints, null, 3)}</pre>
+        <div className="settings">
+          {Object.keys(caps).map(cap => 
+              <>
+              <label>{cap}</label>
+              {Array.isArray(caps[cap])
+                ? Select(cap, caps[cap])
+                : (typeof caps[cap]) === "object" 
+                  ? Slider(cap, caps[cap])
+                  : <pre>{caps[cap]}</pre>}
+            </>
+          )}
+        </div>
         <button onClick={apply}>Apply</button>
       </div>
       <div>

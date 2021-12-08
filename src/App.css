@@ -3,7 +3,7 @@
 }
 
 textarea {
-  width: 600px;
+  width: 550px;
   height: 300px;
 }
 
@@ -20,4 +20,12 @@ textarea {
   white-space: pre-wrap;
   padding: 12px;
   text-align: left;
+}
+
+.settings {
+  display: grid;
+  grid-template-columns: 30% auto;
+  text-align: left;
+  margin: 12px;
+  max-width: 550px;
 }
