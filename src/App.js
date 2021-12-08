@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 function App() {
   const videoRef = useRef();
   const [error, setError] = useState();
+  const [caps, setCaps] = useState();
   const [constraints, setConstraints] = useState(JSON.stringify({
     audio: false,
     video: { width: 1280, height: 720, facingMode: "user" }
@@ -17,6 +18,7 @@ function App() {
       videoRef.current.srcObject = null;
       stream = await navigator.mediaDevices.getUserMedia(JSON.parse(constraints));
       videoRef.current.srcObject = stream;
+      setCaps(JSON.stringify(stream.getTracks()[0].getCapabilities(), null, 3));
       setError("");
       /* use the stream */
     } catch (err) {
@@ -30,7 +32,11 @@ function App() {
 
   return (
     <div className="App">
-      <textarea onChange={(e) => setConstraints(e.target.value)} value={constraints}></textarea><button onClick={apply}>Apply</button>
+      <div>
+        <textarea onChange={(e) => setConstraints(e.target.value)} value={constraints}></textarea>
+        <pre className="caps">{caps}</pre>
+        <button onClick={apply}>Apply</button>
+      </div>
       <div>
         <video ref={videoRef} onLoadedMetadata={loadedMetadata}></video>
       </div>

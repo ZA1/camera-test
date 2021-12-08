@@ -8,5 +8,16 @@ textarea {
 }
 
 .error {
-  border: #f00;
+  border: #f00 1px solid;
+  padding: 12px;
+  margin: 12px;
+}
+
+.caps {
+  display: inline-block;
+  margin-left: 12px;
+  border: 1px solid #333;
+  white-space: pre-wrap;
+  padding: 12px;
+  text-align: left;
 }
