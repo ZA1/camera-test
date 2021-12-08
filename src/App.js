@@ -2,6 +2,8 @@ import './App.css';
 import { useEffect, useRef, useState } from 'react';
 import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 import { BrowserQRCodeReader } from '@zxing/browser';
+import validSound  from './valid.mp3';
+import useSound from 'use-sound';
 
 function App() {
   const videoRef = useRef();
@@ -10,6 +12,7 @@ function App() {
   const [caps, setCaps] = useState({});
   const [update, setUpdate] = useState(1);
   const [code, setCode] = useState();
+  const [beep] = useSound(validSound);
   const [constraints, setConstraints] = useState({
     audio: false,
     video: { width: 1280, height: 720, facingMode: "user" }
@@ -39,6 +42,8 @@ function App() {
         const ctx = canvasRef.current.getContext('2d');
         try {
           const code = reader.decode(videoRef.current);
+
+          beep();
           const points = code.getResultPoints();
           ctx.strokeStyle = '#7e7';
           ctx.lineWidth = 3;

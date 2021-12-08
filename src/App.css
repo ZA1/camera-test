@@ -33,15 +33,15 @@ textarea {
 }
 
 .range {
-  width: 150px;
+  width: 200px;
 }
 
 .val {
-  width: 50px;
+  width: 80px;
 }
 
 select {
-  width: 200px;
+  width: 280px;
 }
 
 label {
