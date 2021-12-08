@@ -1,6 +1,6 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
-import { BarcodeFormat, BinaryBitmap, BrowserMultiFormatReader, DecodeHintType, HybridBinarizer, MultiFormatReader, QRCodeReader, RGBLuminanceSource } from '@zxing/library';
+import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 import { BrowserQRCodeReader } from '@zxing/browser';
 
 function App() {
