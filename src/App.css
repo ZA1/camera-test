@@ -24,8 +24,33 @@ textarea {
 
 .settings {
   display: grid;
+  grid-gap: 12px;
   grid-template-columns: 30% auto;
   text-align: left;
   margin: 12px;
   max-width: 550px;
+  align-items: center;
+}
+
+.range {
+  width: 150px;
+}
+
+.val {
+  width: 50px;
+}
+
+select {
+  width: 200px;
+}
+
+label {
+  text-align: right;
+  font-weight: 600;
+}
+
+button,
+input {
+  padding: 12px;
+  vertical-align: middle;
 }
