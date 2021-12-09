@@ -183,7 +183,6 @@ cv.threshold(equalDst, equalDst, 100, 150, cv.THRESH_BINARY);
         </div>}
       </div>
       <canvas id="canvasOutput"></canvas>
-      <img src="IMG_0015.png" id="test" />
     </div>
   );
 }
