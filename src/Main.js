@@ -17,6 +17,7 @@ function Main() {
   const [clipLimit, setClipLimit] = useState(40);
   const [threshold, setThreshold] = useState(100);
   const [maxVal, setMaxVal] = useState(150);
+  const [applyThreshold, setApplyThreshold] = useState(true);
   //const [type, setType] = useState(0);
   const [beep] = useSound(validSound);
   const { cv } = useOpenCv();
@@ -36,8 +37,8 @@ function Main() {
         const canvas = document.getElementById('canvas');//get canvas
         //const video = document.getElementById("test");
         const video = videoRef.current;
-        canvas.width = 400;
-        canvas.height = 400;
+        canvas.width = 350;
+        canvas.height = 350;
         const xCut = (video.offsetWidth - canvas.width) / 2;
         const yCut = (video.offsetHeight - canvas.height) / 2;
         const context = canvas.getContext('2d');//get canvas context
@@ -63,7 +64,10 @@ function Main() {
             //let M = cv.Mat.ones(2, 2, cv.CV_8U);
 // You can try more different parameters
 //cv.morphologyEx(equalDst, equalDst, cv.MORPH_CLOSE, M);
-cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
+            console.log(applyThreshold);
+            if(applyThreshold) {
+              cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
+            }
             cv.imshow('canvasOutput', equalDst);
             //cv.imshow('canvasOutput', claheDst);
             src.delete(); equalDst.delete(); claheDst.delete(); clahe.delete();
@@ -92,7 +96,7 @@ cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
     let timer = setTimeout(scan, 250);
 
     return () => clearTimeout(timer);
-  }, [beep, clipLimit, cv, gridSize, maxVal, threshold])
+  }, [applyThreshold, beep, clipLimit, cv, gridSize, maxVal, threshold])
 
   const apply = async () => {
     let stream = null;
@@ -207,6 +211,11 @@ cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
         <div>
           <input type="range" value={maxVal} onChange={(e) => setMaxVal(parseFloat(e.target.value))} min="1" max="255" />
           <input type="number" value={maxVal} onChange={(e) => setMaxVal(parseFloat(e.target.value))} min="1" max="255" />
+        </div>
+        <label>Apply Threshold</label>
+        <div>
+          <label><input type="checkbox" checked={applyThreshold} onChange={(e) => {setApplyThreshold(e.target.checked); } } /> Apply</label>
+          
         </div>
       </div>
       <canvas id="canvasOutput"></canvas>
