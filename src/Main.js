@@ -13,6 +13,11 @@ function Main() {
   const [caps, setCaps] = useState({});
   const [update, setUpdate] = useState(1);
   const [code, setCode] = useState();
+  const [gridSize, setGridSize] = useState(8);
+  const [clipLimit, setClipLimit] = useState(40);
+  const [threshold, setThreshold] = useState(100);
+  const [maxVal, setMaxVal] = useState(150);
+  //const [type, setType] = useState(0);
   const [beep] = useSound(validSound);
   const { cv } = useOpenCv();
   const [constraints, setConstraints] = useState({
@@ -51,14 +56,14 @@ function Main() {
             let claheDst = new cv.Mat();
             cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
             cv.equalizeHist(src, equalDst);
-            let tileGridSize = new cv.Size(8, 8);
+            let tileGridSize = new cv.Size(gridSize, gridSize);
             // You can try more different parameters
-            let clahe = new cv.CLAHE(40, tileGridSize);
+            let clahe = new cv.CLAHE(clipLimit, tileGridSize);
             clahe.apply(src, claheDst);
             //let M = cv.Mat.ones(2, 2, cv.CV_8U);
 // You can try more different parameters
 //cv.morphologyEx(equalDst, equalDst, cv.MORPH_CLOSE, M);
-cv.threshold(equalDst, equalDst, 100, 150, cv.THRESH_BINARY);
+cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
             cv.imshow('canvasOutput', equalDst);
             //cv.imshow('canvasOutput', claheDst);
             src.delete(); equalDst.delete(); claheDst.delete(); clahe.delete();
@@ -87,7 +92,7 @@ cv.threshold(equalDst, equalDst, 100, 150, cv.THRESH_BINARY);
     let timer = setTimeout(scan, 250);
 
     return () => clearTimeout(timer);
-  }, [beep, cv])
+  }, [beep, clipLimit, cv, gridSize, maxVal, threshold])
 
   const apply = async () => {
     let stream = null;
@@ -181,6 +186,28 @@ cv.threshold(equalDst, equalDst, 100, 150, cv.THRESH_BINARY);
         {code && <div className="code">
           {code}
         </div>}
+      </div>
+      <div className='settings'>
+        <label>Grid Size</label>
+        <div>
+          <input type="range" value={gridSize} onChange={(e) => setGridSize(parseFloat(e.target.value))} min="1" max="10" />
+          <input type="number" value={gridSize} onChange={(e) => setGridSize(parseFloat(e.target.value))} min="1" max="10" />
+        </div>
+        <label>Clip Limit</label>
+        <div>
+          <input type="range" value={clipLimit} onChange={(e) => setClipLimit(parseFloat(e.target.value))} min="1" max="255" />
+          <input type="number" value={clipLimit} onChange={(e) => setClipLimit(parseFloat(e.target.value))} min="1" max="255" />
+        </div>
+        <label>Threshold</label>
+        <div>
+          <input type="range" value={threshold} onChange={(e) => setThreshold(parseFloat(e.target.value))} min="1" max="255" />
+          <input type="number" value={threshold} onChange={(e) => setThreshold(parseFloat(e.target.value))} min="1" max="255" />
+        </div>
+        <label>Max Val</label>
+        <div>
+          <input type="range" value={maxVal} onChange={(e) => setMaxVal(parseFloat(e.target.value))} min="1" max="255" />
+          <input type="number" value={maxVal} onChange={(e) => setMaxVal(parseFloat(e.target.value))} min="1" max="255" />
+        </div>
       </div>
       <canvas id="canvasOutput"></canvas>
     </div>
