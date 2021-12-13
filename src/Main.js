@@ -7,19 +7,19 @@ function Main({cv}) {
   const videoRef = useRef();
   const canvasRef = useRef();
   const [error, setError] = useState();
-  const [caps, setCaps] = useState({});
-  const [update, setUpdate] = useState(1);
+  // const [caps, setCaps] = useState({});
+  // const [update, setUpdate] = useState(1);
   const [code, setCode] = useState();
-  const [gridSize, setGridSize] = useState(8);
-  const [clipLimit, setClipLimit] = useState(40);
-  const [threshold, setThreshold] = useState(100);
-  const [maxVal, setMaxVal] = useState(150);
-  const [applyThreshold, setApplyThreshold] = useState(true);
+  // const [gridSize, setGridSize] = useState(8);
+  // const [clipLimit, setClipLimit] = useState(40);
+  // const [threshold, setThreshold] = useState(100);
+  // const [maxVal, setMaxVal] = useState(150);
+  // const [applyThreshold, setApplyThreshold] = useState(true);
   //const [type, setType] = useState(0);
   const [beep] = useSound(validSound);
-  const [constraints, setConstraints] = useState({
+  const [constraints] = useState({
     audio: false,
-    video: { width: 1280, height: 720, facingMode: "user" }
+    video: { width: 1280 * 2, height: 720 * 2, facingMode: "user", frameRate: 60 }
   });
 
   useEffect(() => {
@@ -120,78 +120,83 @@ function Main({cv}) {
       detector?.delete();
       clearTimeout(timer);
     }
-  }, [applyThreshold, beep, clipLimit, code, cv, gridSize, maxVal, threshold])
+  }, [beep, code, cv])
 
-  const apply = async () => {
-    let stream = null;
+  useEffect(() => {
+    const apply = async () => {
+      if (cv) {
+        let stream = null;
 
-    try {
-      videoRef.current.pause();
-      videoRef.current.srcObject = null;
-      stream = await navigator.mediaDevices.getUserMedia(constraints);
-      videoRef.current.srcObject = stream;
-      setCaps(stream.getTracks()[0].getCapabilities());
-      console.log(stream.getTracks()[0].getConstraints());
-      setError("");
-      /* use the stream */
-    } catch (err) {
-      setError(err.message);
+        try {
+          videoRef.current.pause();
+          videoRef.current.srcObject = null;
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          videoRef.current.srcObject = stream;
+          //setCaps(stream.getTracks()[0].getCapabilities());
+          console.log(stream.getTracks()[0].getConstraints());
+          setError("");
+          /* use the stream */
+        } catch (err) {
+          setError(err.message);
+        }
+      }
     }
-  }
+    apply();
+  }, [constraints, cv]);
 
   const loadedMetadata = () => {
     videoRef.current.play();
   };
 
-  const Slider = (name, cap) => {
-    const change = (event) => {
-      const video = { ...constraints.video };
-      video[name] = parseFloat(event.target.value);
-      setConstraints({ ...constraints, video });
-      setUpdate(update + 1);
-    }
+  // const Slider = (name, cap) => {
+  //   const change = (event) => {
+  //     const video = { ...constraints.video };
+  //     video[name] = parseFloat(event.target.value);
+  //     setConstraints({ ...constraints, video });
+  //     setUpdate(update + 1);
+  //   }
 
-    const remove = () => {
-      const video = { ...constraints.video };
-      delete video[name];
-      setConstraints({ ...constraints, video });
-      setUpdate(update + 1);
-    }
+  //   const remove = () => {
+  //     const video = { ...constraints.video };
+  //     delete video[name];
+  //     setConstraints({ ...constraints, video });
+  //     setUpdate(update + 1);
+  //   }
 
-    const value = constraints.video[name];
-    return <div key={name + "-edt"}>
-      <input className="range" key={name + "-range"} update={update} type="range" max={cap.max} min={cap.min} step={cap.step} value={value} onChange={change} />
-      <input className="val" key={name + "-num"} update={update} type="number" max={cap.max} min={cap.min} step={cap.step || 0.01} value={value} onChange={change} />
-      <button onClick={remove}>X</button>
-    </div>;
-  }
+  //   const value = constraints.video[name];
+  //   return <div key={name + "-edt"}>
+  //     <input className="range" key={name + "-range"} update={update} type="range" max={cap.max} min={cap.min} step={cap.step} value={value} onChange={change} />
+  //     <input className="val" key={name + "-num"} update={update} type="number" max={cap.max} min={cap.min} step={cap.step || 0.01} value={value} onChange={change} />
+  //     <button onClick={remove}>X</button>
+  //   </div>;
+  // }
 
-  const Select = (name, cap) => {
-    const change = (event) => {
-      const video = { ...constraints.video };
-      video[name] = event.target.value;
-      setConstraints({ ...constraints, video });
-    }
+  // const Select = (name, cap) => {
+  //   const change = (event) => {
+  //     const video = { ...constraints.video };
+  //     video[name] = event.target.value;
+  //     setConstraints({ ...constraints, video });
+  //   }
 
-    const remove = () => {
-      const video = { ...constraints.video };
-      delete video[name];
-      setConstraints({ ...constraints, video });
-    }
+  //   const remove = () => {
+  //     const video = { ...constraints.video };
+  //     delete video[name];
+  //     setConstraints({ ...constraints, video });
+  //   }
 
-    return <div>
-      <select value={constraints.video[cap]} onChange={change}>
-        {cap.map(v => <option>{v}</option>)}
-      </select>
-      <button onClick={remove}>X</button>
-    </div>;
-  }
+  //   return <div>
+  //     <select value={constraints.video[cap]} onChange={change}>
+  //       {cap.map(v => <option>{v}</option>)}
+  //     </select>
+  //     <button onClick={remove}>X</button>
+  //   </div>;
+  // }
 
   return (
     <div className="App">
       <div>
-        <pre className="caps">{JSON.stringify(constraints, null, 3)}</pre>
-        <div className="settings">
+        {/* <pre className="caps">{JSON.stringify(constraints, null, 3)}</pre> */}
+        {/* <div className="settings">
           {Object.keys(caps).map(cap =>
             <>
               <label>{cap}</label>
@@ -202,20 +207,20 @@ function Main({cv}) {
                   : <pre>{caps[cap]}</pre>}
             </>
           )}
-        </div>
-        <button onClick={apply}>Apply</button>
+        </div> */}
+        {/* <button onClick={apply}>Apply</button> */}
         {error &&<div className="error">
           {error}
         </div>}
       </div>
       <div id="contain">
-        <video ref={videoRef} onLoadedMetadata={loadedMetadata} style={{  top: 0, left: 0 }}></video>
-        <canvas ref={canvasRef} id="canvas" style={{ top: 0, left: 0 }}></canvas>
+        <video ref={videoRef} onLoadedMetadata={loadedMetadata} style={{ position: "relative", top: 0, left: 0 }}></video>
+        <canvas ref={canvasRef} id="canvas" style={{ display: "none", top: 0, left: 0 }}></canvas>
         {code && <div className="code">
           {code}
         </div>}
       </div>
-      <div className='settings'>
+      {/* <div className='settings'>
         <label>Grid Size</label>
         <div>
           <input type="range" value={gridSize} onChange={(e) => setGridSize(parseFloat(e.target.value))} min="1" max="10" />
@@ -241,7 +246,7 @@ function Main({cv}) {
           <label><input type="checkbox" checked={applyThreshold} onChange={(e) => {setApplyThreshold(e.target.checked); } } /> Apply</label>
           
         </div>
-      </div>
+      </div> */}
       <canvas id="canvasOutput"></canvas>
     </div>
   );
