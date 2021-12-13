@@ -1,5 +1,5 @@
 import './App.css';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import validSound  from './valid.mp3';
 import useSound from 'use-sound';
 
@@ -122,27 +122,34 @@ function Main({cv}) {
     }
   }, [beep, code, cv])
 
-  useEffect(() => {
-    const apply = async () => {
-      if (cv) {
-        let stream = null;
+  const startCamera = useCallback(async () => {
+    if (cv) {
 
-        try {
-          videoRef.current.pause();
-          videoRef.current.srcObject = null;
-          stream = await navigator.mediaDevices.getUserMedia(constraints);
-          videoRef.current.srcObject = stream;
-          //setCaps(stream.getTracks()[0].getCapabilities());
-          console.log(stream.getTracks()[0].getConstraints());
-          setError("");
-          /* use the stream */
-        } catch (err) {
-          setError(err.message);
-        }
+      let stream = null;
+
+      try {
+        videoRef.current.pause();
+        videoRef.current.srcObject = null;
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        videoRef.current.srcObject = stream;
+        //setCaps(stream.getTracks()[0].getCapabilities());
+        console.log(stream.getTracks()[0].getConstraints());
+        setError("");
+        /* use the stream */
+      } catch (err) {
+        setError(err.message);
       }
     }
-    apply();
   }, [constraints, cv]);
+
+  useEffect(() => {
+    const showError = (event) => {
+      setError(event.message);
+    }
+
+    window.addEventListener("error", showError);
+    startCamera();
+  }, [startCamera]);
 
   const loadedMetadata = () => {
     videoRef.current.play();
@@ -208,7 +215,7 @@ function Main({cv}) {
             </>
           )}
         </div> */}
-        {/* <button onClick={apply}>Apply</button> */}
+        {cv ? <button onClick={startCamera}>Start Camera</button> : <div>Loading ...</div>}
         {error &&<div className="error">
           {error}
         </div>}
