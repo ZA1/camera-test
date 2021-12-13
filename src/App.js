@@ -7,9 +7,6 @@ const scriptTagId = "open-cv-script-tag";
 // const srModelTask = fetch("/models/sr.caffemodel");
 // const srProtoTxtTask = fetch("/models/sr.prototxt");
 
-const modelFiles = ["detect.caffemodel", "detect.prototxt", "sr.caffemodel", "sr.prototxt"];
-let fileTasks;
-
 function App() {
   const [cv, setCv] = useState();
 

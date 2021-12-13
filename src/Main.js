@@ -1,7 +1,5 @@
 import './App.css';
 import { useEffect, useRef, useState } from 'react';
-import { BarcodeFormat, DecodeHintType } from '@zxing/library';
-import { BrowserQRCodeReader } from '@zxing/browser';
 import validSound  from './valid.mp3';
 import useSound from 'use-sound';
 
@@ -245,7 +243,6 @@ function Main({cv}) {
         </div>
       </div>
       <canvas id="canvasOutput"></canvas>
-      <img src="test1.png" id="test" />
     </div>
   );
 }
