@@ -2,11 +2,10 @@ import './App.css';
 import { useEffect, useRef, useState } from 'react';
 import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 import { BrowserQRCodeReader } from '@zxing/browser';
-import { useOpenCv } from 'opencv-react';
 import validSound  from './valid.mp3';
 import useSound from 'use-sound';
 
-function Main() {
+function Main({cv}) {
   const videoRef = useRef();
   const canvasRef = useRef();
   const [error, setError] = useState();
@@ -20,29 +19,41 @@ function Main() {
   const [applyThreshold, setApplyThreshold] = useState(true);
   //const [type, setType] = useState(0);
   const [beep] = useSound(validSound);
-  const { cv } = useOpenCv();
   const [constraints, setConstraints] = useState({
     audio: false,
     video: { width: 1280, height: 720, facingMode: "user" }
   });
 
   useEffect(() => {
-    const reader = new BrowserQRCodeReader();
-    const hints = new Map();
-    const formats = [BarcodeFormat.QR_CODE];
-    hints.set(DecodeHintType.POSSIBLE_FORMATS, formats);
+    
+    let detector;
+    
+    if(cv) {
+        detector = new cv.wechat_qrcode_WeChatQRCode(
+          "wechat_qrcode/detect.prototxt",
+          "wechat_qrcode/detect.caffemodel",
+          "wechat_qrcode/sr.prototxt",
+          "wechat_qrcode/sr.caffemodel"
+        );
+    }
 
     const scan = () => {
       if (videoRef.current.srcObject && !videoRef.current.paused) {
         const canvas = document.getElementById('canvas');//get canvas
-        //const video = document.getElementById("test");
         const video = videoRef.current;
-        canvas.width = 350;
-        canvas.height = 350;
-        const xCut = (video.offsetWidth - canvas.width) / 2;
-        const yCut = (video.offsetHeight - canvas.height) / 2;
-        const context = canvas.getContext('2d');//get canvas context
-        context.drawImage(video, -xCut, -yCut, video.offsetWidth, video.offsetHeight);
+        //const video = document.getElementById("test");
+
+        canvas.width = video.offsetWidth;
+        canvas.height = video.offsetHeight;
+        const ctx = canvasRef.current.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // canvas.width = 350;
+        // canvas.height = 350;
+        // const xCut = (video.offsetWidth - canvas.width) / 2;
+        // const yCut = (video.offsetHeight - canvas.height) / 2;
+        // const context = canvas.getContext('2d');//get canvas context
+        // context.drawImage(video, -xCut, -yCut, video.offsetWidth, video.offsetHeight);
         //const data = context.getImageData(0, 0, video.videoWidth, video.videoHeight);
 
         // const luminanceSource = new RGBLuminanceSource(context.getImageData(0, 0, canvas.width, canvas.height), canvas.width, canvas.height);
@@ -50,41 +61,53 @@ function Main() {
         //canvasRef.current.width = videoRef.current.videoWidth;
         //canvasRef.current.height = videoRef.current.videoHeight;
         // document.getElementById("contain").style.width = canvasRef.current.width + "px";
-        const ctx = canvasRef.current.getContext('2d');
+        // const ctx = canvasRef.current.getContext('2d');
         try {
           let src = cv.imread(canvas);
-          let equalDst = new cv.Mat();
-            let claheDst = new cv.Mat();
-            cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-            cv.equalizeHist(src, equalDst);
-            let tileGridSize = new cv.Size(gridSize, gridSize);
-            // You can try more different parameters
-            let clahe = new cv.CLAHE(clipLimit, tileGridSize);
-            clahe.apply(src, claheDst);
-            //let M = cv.Mat.ones(2, 2, cv.CV_8U);
-// You can try more different parameters
-//cv.morphologyEx(equalDst, equalDst, cv.MORPH_CLOSE, M);
-            console.log(applyThreshold);
-            if(applyThreshold) {
-              cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
-            }
-            cv.imshow('canvasOutput', equalDst);
-            //cv.imshow('canvasOutput', claheDst);
-            src.delete(); equalDst.delete(); claheDst.delete(); clahe.delete();
-          const code = reader.decodeFromCanvas(document.getElementById('canvasOutput'));
+          const out = new cv.MatVector()
+          const results = detector.detectAndDecode(src, out);
+          let i = 0
+          const arr = []
+          while(i < results.size()) {
+            arr.push(results.get(i++))
+          }
+          results.delete();
+          out.delete();
+//           let equalDst = new cv.Mat();
+//             let claheDst = new cv.Mat();
+//             cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+//             cv.equalizeHist(src, equalDst);
+//             let tileGridSize = new cv.Size(gridSize, gridSize);
+//             // You can try more different parameters
+//             let clahe = new cv.CLAHE(clipLimit, tileGridSize);
+//             clahe.apply(src, claheDst);
+//             //let M = cv.Mat.ones(2, 2, cv.CV_8U);
+// // You can try more different parameters
+// //cv.morphologyEx(equalDst, equalDst, cv.MORPH_CLOSE, M);
+//             console.log(applyThreshold);
+//             if(applyThreshold) {
+//               cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
+//             }
+//             cv.imshow('canvasOutput', equalDst);
+//             //cv.imshow('canvasOutput', claheDst);
+//             src.delete(); equalDst.delete(); claheDst.delete(); clahe.delete();
+//           const code = reader.decodeFromCanvas(document.getElementById('canvasOutput'));
 
-          beep();
-          const points = code.getResultPoints();
-          ctx.strokeStyle = '#7e7';
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(points[0].getX(), points[0].getY());
-          ctx.lineTo(points[1].getX(), points[1].getY());
-          ctx.lineTo(points[2].getX(), points[2].getY());
-          ctx.lineTo(points[3].getX(), points[3].getY());
-          ctx.lineTo(points[0].getX(), points[0].getY());
-          ctx.stroke();
-          setCode(code.getText());
+          if(arr.length > 0) {
+            setCode(arr[0]);
+            beep();
+          }
+          // const points = code.getResultPoints();
+          // ctx.strokeStyle = '#7e7';
+          // ctx.lineWidth = 3;
+          // ctx.beginPath();
+          // ctx.moveTo(points[0].getX(), points[0].getY());
+          // ctx.lineTo(points[1].getX(), points[1].getY());
+          // ctx.lineTo(points[2].getX(), points[2].getY());
+          // ctx.lineTo(points[3].getX(), points[3].getY());
+          // ctx.lineTo(points[0].getX(), points[0].getY());
+          // ctx.stroke();
+          
         } catch(err) {
           //console.error(err);
           setCode("");
@@ -95,8 +118,11 @@ function Main() {
 
     let timer = setTimeout(scan, 250);
 
-    return () => clearTimeout(timer);
-  }, [applyThreshold, beep, clipLimit, cv, gridSize, maxVal, threshold])
+    return () => {
+      detector?.delete();
+      clearTimeout(timer);
+    }
+  }, [applyThreshold, beep, clipLimit, code, cv, gridSize, maxVal, threshold])
 
   const apply = async () => {
     let stream = null;
@@ -219,6 +245,7 @@ function Main() {
         </div>
       </div>
       <canvas id="canvasOutput"></canvas>
+      <img src="test1.png" id="test" />
     </div>
   );
 }
