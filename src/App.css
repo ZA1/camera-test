@@ -67,4 +67,15 @@ pre {
   white-space: pre-wrap; 
   word-wrap: break-word;
   width: calc(100% - 24px);
+  top: 0;
+  left: 0;
+}
+
+#contain {
+  max-width: 100%;
+  position: relative;
+}
+
+#contain video {
+  max-width: 100%;
 }
