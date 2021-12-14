@@ -6,7 +6,6 @@ import useSound from 'use-sound';
 function Main({cv}) {
   const videoRef = useRef();
   const canvasRef = useRef();
-  const [error, setError] = useState();
   // const [caps, setCaps] = useState({});
   // const [update, setUpdate] = useState(1);
   const [code, setCode] = useState();
@@ -134,20 +133,13 @@ function Main({cv}) {
         videoRef.current.srcObject = stream;
         //setCaps(stream.getTracks()[0].getCapabilities());
         console.log(stream.getTracks()[0].getConstraints());
-        setError("");
         /* use the stream */
       } catch (err) {
-        setError(err.message);
       }
     }
   }, [constraints, cv]);
 
   useEffect(() => {
-    const showError = (event) => {
-      setError(event.message);
-    }
-
-    window.addEventListener("error", showError);
     startCamera();
   }, [startCamera]);
 
@@ -216,9 +208,6 @@ function Main({cv}) {
           )}
         </div> */}
         {cv ? <button onClick={startCamera}>Start Camera</button> : <div>Loading ...</div>}
-        {error &&<div className="error">
-          {error}
-        </div>}
       </div>
       <div id="contain">
         <video ref={videoRef} onLoadedMetadata={loadedMetadata} style={{ position: "relative", top: 0, left: 0 }}></video>

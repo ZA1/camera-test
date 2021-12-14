@@ -9,6 +9,7 @@ const scriptTagId = "open-cv-script-tag";
 
 function App() {
   const [cv, setCv] = useState();
+  const [error, setError] = useState();
 
   // const loadModels = useCallback(async () => {
   //   window.Module.FS_createPath("/", "models", true, true);
@@ -18,6 +19,25 @@ function App() {
   //     window.Module.FS_createDataFile(`/models/${file.fileName}`, null, Uint8Array.from(buffer), true, true, true)
   //   }
   // }, []);
+
+  useEffect(() => {
+    const showError = (event) => {
+      setError(event.message);
+      return false;
+    }
+
+    window.addEventListener("error", (event) => {
+      showError({ message: event.message });
+    });
+  
+    window.addEventListener("unhandledrejection", (event) => {
+      showError({ message: event.reason.message });
+    });
+
+    window.addEventListener("error", showError, {capture: true});
+
+    return () => window.removeEventListener("error", showError);
+  }, [setError]);
 
   const moduleLoaded = useCallback(async () => {
     setCv(await window.cv);
@@ -38,7 +58,7 @@ function App() {
       
       const tag = document.createElement("script");
       tag.id = scriptTagId;
-      tag.src = "/opencv_custom.js";
+      tag.src = "/opencv.js";
       tag.nonce = true;
       tag.defer = true;
       tag.async = true;
@@ -56,8 +76,11 @@ function App() {
     }
   }, [moduleLoaded]);
 
-  return (
-    <Main cv={cv} />
+  return (<>
+    {error && <div className="error">
+          {error}
+        </div>}
+    <Main cv={cv} /></>
   );
 }
 
