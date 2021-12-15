@@ -211,7 +211,7 @@ function Main({cv}) {
       </div>
       <div id="contain">
         <video ref={videoRef} onLoadedMetadata={loadedMetadata} style={{ position: "relative", top: 0, left: 0 }}></video>
-        <div style={{position: "absolute", top: 0, left: 0, height: "210px", width: "210px", margin: "50px", border: "2px solid #FF0"}}></div>
+        <div style={{position: "absolute", top: 0, left: 0, height: "270px", width: "270px", margin: "50px", border: "2px solid #FF0"}}></div>
         <canvas ref={canvasRef} id="canvas" style={{ display: "none", top: 0, left: 0 }}></canvas>
         {code && <div className="code">
           {code}
