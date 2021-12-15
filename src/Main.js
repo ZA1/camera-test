@@ -40,10 +40,10 @@ function Main({cv}) {
         const video = videoRef.current;
         //const video = document.getElementById("test");
 
-        canvas.width = video.offsetWidth;
-        canvas.height = video.offsetHeight;
+        canvas.width = 400; //video.videoWidth;
+        canvas.height = 400; //video.videoHeight;
         const ctx = canvasRef.current.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
         // canvas.width = 350;
         // canvas.height = 350;
@@ -61,8 +61,23 @@ function Main({cv}) {
         // const ctx = canvasRef.current.getContext('2d');
         try {
           let src = cv.imread(canvas);
+            let equalDst = new cv.Mat();
+            let claheDst = new cv.Mat();
+            cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+            cv.equalizeHist(src, equalDst);
+            let tileGridSize = new cv.Size(8, 8);
+            // You can try more different parameters
+            let clahe = new cv.CLAHE(40, tileGridSize);
+            clahe.apply(src, claheDst);
+            //let M = cv.Mat.ones(2, 2, cv.CV_8U);
+// You can try more different parameters
+//cv.morphologyEx(equalDst, equalDst, cv.MORPH_CLOSE, M);
+            
+              //cv.threshold(equalDst, equalDst, 100, 150, cv.THRESH_BINARY);
+            
+            
           const out = new cv.MatVector()
-          const results = detector.detectAndDecode(src, out);
+          const results = detector.detectAndDecode(equalDst, out);
           let i = 0
           const arr = []
           while(i < results.size()) {
@@ -70,24 +85,9 @@ function Main({cv}) {
           }
           results.delete();
           out.delete();
-//           let equalDst = new cv.Mat();
-//             let claheDst = new cv.Mat();
-//             cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-//             cv.equalizeHist(src, equalDst);
-//             let tileGridSize = new cv.Size(gridSize, gridSize);
-//             // You can try more different parameters
-//             let clahe = new cv.CLAHE(clipLimit, tileGridSize);
-//             clahe.apply(src, claheDst);
-//             //let M = cv.Mat.ones(2, 2, cv.CV_8U);
-// // You can try more different parameters
-// //cv.morphologyEx(equalDst, equalDst, cv.MORPH_CLOSE, M);
-//             console.log(applyThreshold);
-//             if(applyThreshold) {
-//               cv.threshold(equalDst, equalDst, threshold, maxVal, cv.THRESH_BINARY);
-//             }
-//             cv.imshow('canvasOutput', equalDst);
-//             //cv.imshow('canvasOutput', claheDst);
-//             src.delete(); equalDst.delete(); claheDst.delete(); clahe.delete();
+
+          src.delete(); equalDst.delete(); claheDst.delete(); clahe.delete();
+
 //           const code = reader.decodeFromCanvas(document.getElementById('canvasOutput'));
 
           if(arr.length > 0) {
@@ -211,6 +211,7 @@ function Main({cv}) {
       </div>
       <div id="contain">
         <video ref={videoRef} onLoadedMetadata={loadedMetadata} style={{ position: "relative", top: 0, left: 0 }}></video>
+        <div style={{position: "absolute", top: 0, left: 0, height: "210px", width: "210px", margin: "50px", border: "2px solid #FF0"}}></div>
         <canvas ref={canvasRef} id="canvas" style={{ display: "none", top: 0, left: 0 }}></canvas>
         {code && <div className="code">
           {code}
